@@ -1,0 +1,162 @@
+@import url('https://fonts.googleapis.com/css?family=Lato|Montserrat&display=swap');
+
+$color-main: rgb(65, 65, 65);
+
+.comment {
+    font-family: "Lato",serif;
+    font-weight: normal;
+    overflow: hidden;
+    background: rgb(255, 255, 255);
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 0 34px rgba(0, 0, 0, 0.059);
+    width: 22vw;
+    max-height: 40px;
+    margin-left: 15px;
+    position: relative;
+    transition: all 600ms, left 400ms ease-out, max-height 600ms ease-in-out;
+    &:hover {
+        left: -25px !important;
+        max-height: 550px;
+    }
+    &:hover &__header__line {
+       height: 25px;
+       width: 2px;
+       top: 20px;
+       background: rgba(241, 226, 13, 0.788);
+
+    }
+
+    &__header {
+        display: flex;
+        padding-bottom: 5px;
+        border-bottom: 2px solid rgba(14, 14, 14, 0.034);
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+        user-select: none;
+        &__line{
+            width: 5px;
+            height: 2px;
+            background: rgba(241, 22, 22, 0.26);
+            position: absolute;
+            top: 32px;
+            transition: .5s;
+        }
+        &__mistake {
+            color: rgb(204, 204, 204);
+            font-size: 11px;
+            width: 12ch;
+            left: 50%;
+            text-align: right;
+            white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+
+        }
+        h2 {
+            color: rgb(78, 78, 78);
+            position: relative;
+            left: 13px;
+        }
+        &__learn-more {
+            text-decoration: none;
+            font-size: 14px;
+            color: rgb(78, 78, 78);
+            background-image: linear-gradient(rgba($color-main, 0.5) 0%, rgba($color-main, 0.5) 100%);
+            background-repeat: repeat-y;
+            background-size: 0% 0em;
+            font-weight: 400;
+            background-position: 0 65%;
+            transition: background-size 300ms ease, color 300ms;
+            padding: 5px;
+            border-radius: 3px;
+            float: right;
+            &:hover {
+                background-image: linear-gradient(rgba($color-main, 1) 0%, rgba($color-main, 1) 100%);
+                background-size: 100% 1em;
+                color: white;
+
+            }
+             
+           
+        }
+    }
+    
+    &__thesaurus-link {
+        text-decoration: none;
+        font-weight: bold;
+        color: rgb(14, 150, 55);
+        background-image: linear-gradient(rgba($color-main, 0.5) 0%, rgba($color-main, 0.5) 100%);
+        background-repeat: repeat-y;
+        background-size: 0% 0em;
+        font-weight: 400;
+        background-position: 0 65%;
+        transition: background-size 300ms ease, color 300ms;
+        padding: 1px;
+        border-radius: 3px;
+        &:hover {
+            background-image: linear-gradient(rgba($color-main, 1) 0%, rgba($color-main, 1) 100%);
+            background-size: 100% 1em;
+            color: white;
+
+        }
+    }
+    &__text {
+        font-family: Roboto;
+        font-weight: 500;
+        font-size: 14px;
+        color: rgb(134, 134, 134)
+    }
+    &__replaces {
+        width: 100%;
+        margin-bottom: 10px;
+        &-replace {
+            background: rgb(62, 165, 101);
+            border: none;
+            border-radius: 3px;
+            transition: 400ms;
+            margin: 2px;
+            padding: 5px 10px;
+            font-size: 15px;
+            color: white;
+            box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            &:focus {
+                border: none;
+                outline: 0;
+            }
+            &:hover{
+                background: rgb(64, 202, 117);
+            }
+        }
+        
+    }
+    
+    
+
+}
+.example {
+    width: 100%;
+    text-align: left;
+    text-indent: 1em;
+    padding: 5px 0;
+    &:before {
+        content: '';
+        position: absolute;
+        width: 2px;
+        height: 25px;
+        left: 15px;
+        background: rgba(255, 100, 100, 0.849);
+        // border-radius: 50%;
+
+    }
+    &__wrong {
+        font-size: 16px;
+        color: tomato;
+    }
+    &__correct {
+        font-size: 16px;
+        color: green;
+    }
+}

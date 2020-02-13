@@ -1,0 +1,40 @@
+{
+  "name": "rich-editor",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build"
+  },
+  "dependencies": {
+    "@pablopunk/docs-soap": "^1.2.1",
+    "d3-ease": "^1.0.6",
+    "docs-soap": "^1.2.1",
+    "draft-js": "^0.11.4",
+    "draft-js-import-html": "^1.4.1",
+    "draft-js-import-markdown": "^1.4.0",
+    "draft-js-plugins-editor": "^3.0.0",
+    "html-to-draftjs": "^1.5.0",
+    "immutable": "^4.0.0-rc.12",
+    "node-sass": "^4.13.1",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "react-draft-wysiwyg": "^1.14.4",
+    "react-redux": "^7.1.3",
+    "react-scripts": "3.3.0",
+    "react-spring": "^8.0.27",
+    "redux": "^4.0.5"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
