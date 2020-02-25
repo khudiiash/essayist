@@ -1,0 +1,11 @@
+export { default as phrasalVerbs } from "./phrasal-verbs";
+export { default as weakWords } from "./weak-words";
+export { default as pronouns } from "./pronouns";
+export { default as wordiness } from "./wordiness";
+export { default as vague } from "./vague";
+export { default as informal } from "./informal";
+export { default as replace } from "./replace";
+export { default as weasel } from "./weasel";
+export { default as shortForms } from "./short";
+export { default as british } from "./british";
+export { default as overgeneralization } from "./overgeneralization";

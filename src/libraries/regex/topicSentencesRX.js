@@ -1,0 +1,2 @@
+let topicSentencesRX = /((?<=^)(((?!\.\s|"|“|\(([^\)]+)?\d{4}\)).)*)?(\%|percent|(?:m|b|tr)illions?|According to|Studies (?:reveal|suggest|propose|state|claim)|research (ha(s|d) )?prove(n|d)|author(s)? \w+ that|\d{3,}(?!\)))(((?!\.\s|\(\w+\)|\(([^\)]+)?\d{4}\)).)*)(?<!\sp+|\d)\.(?=\s))(?!\n)/
+export default topicSentencesRX

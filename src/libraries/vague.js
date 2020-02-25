@@ -1,5 +1,5 @@
 let vague = [
-
+    'at times',
     'too many',
     'poor',
     'hot',
@@ -7,9 +7,13 @@ let vague = [
     'many',
     'few',
     'happy',
+    'happier',
+    'stronger',
     'strong',
+    'weaker',
     'weak',
     'sad',
+    'angrier',
     'angry',
     'scared',
     'confused',
@@ -22,11 +26,14 @@ let vague = [
     "someone",
     "somewhat",
     "something",
+    "anything",
     'somewhere',
     'somehow',
     'someday',
     'some',
-    'perfect'
+    'perfect',
+    "almost",
+    'maybe',
  ]
 
 

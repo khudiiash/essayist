@@ -1,3 +1,4 @@
+/* eslint-disable */
 export default mistake => mistake.replace(/and/, "&")
                         .replace(/(?<=\w+),(?=\d{4})/,', ')
                         .replace(/(?<!,) (?=\d{4})/, ", ")

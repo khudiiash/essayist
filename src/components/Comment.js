@@ -1,19 +1,18 @@
-import React, { Component, useState } from 'react';
+import React, { useState } from 'react';
 import './Comment.scss'
 import prepositions from '../libraries/prepositions'
 import {useSpring,animated} from 'react-spring'
-import * as easings from 'd3-ease'
 
 
 const Link = ({ url }) => {
     return (
-        <a href={url} target='_blank' className="comment__header__learn-more">
+        <a href={url} rel="noopener noreferrer" target='_blank' className="comment__header__learn-more">
             Learn more
         </a>
     )
 
 }
-const Comment=({showHighlight,comment: { id, name, text, replaceOptions, readMore, mistake }, replaceById})=> {
+const Comment=({showHighlight,comment: { id, block, name, text, replaceOptions, readMore, mistake }, replaceById})=> {
       
 
     let [state,handleComment] = useState({maxHeight: '40px',left: '0'})
@@ -64,7 +63,7 @@ const Comment=({showHighlight,comment: { id, name, text, replaceOptions, readMor
             </div>
             <p className='comment__text' dangerouslySetInnerHTML={{ __html: text }}></p>
             {replaceItems.length ?
-                <div className='comment__replaces'>{replaceItems.map((repl, index) => (<button className='comment__replaces-replace' onClick={() => replaceById(textToReplace, repl)} key={index}>{repl}</button>))}</div>
+                <div className='comment__replaces'>{replaceItems.map((repl, index) => (<button style={{background: !repl && "tomato"}}className='comment__replaces-replace' onClick={() => replaceById(textToReplace, repl, block)} key={index} dangerouslySetInnerHTML={{__html: repl || "remove it"}}></button>))}</div>
                 : ''
             }
             {readMore &&

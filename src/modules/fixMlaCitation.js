@@ -1,3 +1,4 @@
+/* eslint-disable */
 export default mistake => mistake.replace(/&/, "and")
                             .replace(/p\.\s?/i,'')
                             .replace(/, (?=\d+)/, " ")

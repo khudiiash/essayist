@@ -1,10 +1,6 @@
 const weasel = [
-    
-    "at all times",
     "at the end of the day",
     "at the present time",
-    'always',
-    "never",
     "in all cases",
     "in many cases",
     "in most cases",
@@ -23,17 +19,8 @@ const weasel = [
     'a matter of fact',
     'essentially',
     'virtually',
-    'usually',
-    'basically',
-    'simply',
     'totally',
     "absolutely",
-    "almost",
-    'maybe',
-    'cutting-edge',
-    'that being said',
-    'could be',
-    'everyday',
     'a growing body of evidence',                       
     'it is commonly known',
     'as everyone knows',
@@ -45,12 +32,10 @@ const weasel = [
     'some say',
     'some argue',
     'it is known that',
+    'it is undeniable that',
     'it is commonly known that',
     "it is argued that",
     "it is arguable that",
-    'anybody',
-    'anyone',
-    'everybody',
-    'everyone',
+    
 ]
 export default weasel

@@ -12,9 +12,8 @@ class App extends Component {
         highlightTarget: null
       }
     }
-  replaceById=(text,repl)=> {
-    console.log(text,repl)
-    this.setState({replaceTarget:{text,repl}})
+  replaceById=(text,repl, block)=> {
+    this.setState({replaceTarget:{text,repl,block}})
   }
   killReplaceTarget=()=> {
     this.setState({replaceTarget:null})

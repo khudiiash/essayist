@@ -1,66 +1,62 @@
 import React from "react";
 import { Editor, ContentState, EditorState, RichUtils, Modifier, CompositeDecorator, SelectionState, getDefaultKeyBinding, convertFromHTML } from "draft-js";
-import {stateFromHTML} from 'draft-js-import-html'
-import { commentActions } from '../redux/actions'
-import { useDispatch, useSelector } from 'react-redux'
-import docsSoap from 'docs-soap';
-import htmlToDraft from 'html-to-draftjs';
+
 import "draft-js/dist/Draft.css"
-
 import "./rich.css";
-//libs
-import phrasalVerbs from "../libraries/phrasal-verbs";
-import weakWords from "../libraries/weak-words";
-import pronouns from "../libraries/pronouns";
-import wordiness from "../libraries/wordiness";
-import vague from "../libraries/vague";
-import informal from "../libraries/informal";
-import replace from "../libraries/replace";
-import weasel from "../libraries/weasel";
-import replacePV from "../libraries/replacePV";
-import shortForms from "../libraries/short";
-import british from "../libraries/british";
-import prepositions from "../libraries/prepositions";
-import countries from "../libraries/countries"
-import conjunctions from "../libraries/conjunctions"
-import auxiliary from "../libraries/auxiliary"
-// regexp
-import concludingSentencesRX from "../libraries/regex/concludingSentencesRX";
-import {
-  passiveRXglobal,
-  passiveRXinline
-} from "../libraries/regex/passiveRX";
-import {
-  punctuationRXglobal,
-  punctuationRXinline
-} from "../libraries/regex/punctuationRX";
-import outdated from "../libraries/regex/outdated.js";
-import factChecker from "../libraries/regex/factChecker";
-import conjunctionStart from "../libraries/regex/conjunctionStart";
-import prepositionalRX from "../libraries/regex/prepositionalRX";
-import apostrophesRX from "../libraries/regex/apostrophesRX";
-import repetitionsRX from "../libraries/regex/repetitionsRX";
-import { APAcitationGlobal, APAcitationInline } from "../libraries/regex/APAcitationRX";
-import { MLAcitationGlobal, MLAcitationInline } from "../libraries/regex/MLAcitationRX";
-import { APAtitle, APAjournal } from "../libraries/regex/APAreference";
-import determiner from "../libraries/regex/determiner";
-import wordOrderRX from "../libraries/regex/wordOrder";
-import thesisRX from "../libraries/regex/thesisRX";
-import well from "../libraries/regex/well";
-import uppercaseRX from "../libraries/regex/uppercaseRX";
-import pageForQuote from "../libraries/regex/pageForQuote"
-import headingRX from "../libraries/regex/headingRX";
 
-import { verbs } from '../libraries/regex/passiveRX'
-import { which } from '../libraries/regex/which'
+//libs
+import {
+  phrasalVerbs,
+  weakWords,
+  pronouns,
+  wordiness,
+  vague,
+  informal,
+  replace,
+  weasel,
+  shortForms,
+  british,
+  overgeneralization
+} from "../libraries"
+
+// regexp
+import {
+  concludingSentencesRX,
+  topicSentencesRX,
+  questionsRX,
+  thesisRX,
+  determiner,
+  passiveRXglobal,
+  passiveRXinline,
+  punctuationRXglobal,
+  punctuationRXinline,
+  outdated,
+  factChecker,
+  conjunctionStart,
+  prepositionalRX,
+  repetitionsRX,
+  isReference,
+  APAcitationGlobal, 
+  APAcitationInline,
+  APAtitle,
+  APAjournal,
+  MLAcitationGlobal, 
+  MLAcitationInline,
+  wordOrderRX,
+  well,
+  uppercaseRX,
+  pageForQuote,
+  headingRX,
+  apostrophes,
+  which
+} from "../libraries/regex"
+
 // Modules
-import clean from "../modules/clean";
 import fixApaCitation from '../modules/fixApaCitation'
 import fixMlaCitation from '../modules/fixMlaCitation'
 import toTitleCase from '../modules/toTitleCase'
 
 import {useSpring,animated} from 'react-spring'
-import * as easings from 'd3-ease'
 
 let replaceArray = replace.map(item => Object.keys(item)[0])
 let regexes = []
@@ -68,7 +64,7 @@ let regexes = []
   .concat(passiveRXglobal)
   .concat(punctuationRXglobal)
   .concat(conjunctionStart)
-  .concat(apostrophesRX)
+  .concat(apostrophes)
   .concat(determiner)
   .concat(headingRX)
   .concat(wordOrderRX)
@@ -81,11 +77,14 @@ let regexes = []
   .concat(outdated)
   .concat(repetitionsRX)
   .concat(/^Introduction$/g)
+  .concat(/\binternet\b/g)
 
-let sentenceRX = []
+let sentencesRX = []
   .concat(thesisRX)
   .concat(concludingSentencesRX)
+  .concat(topicSentencesRX)
   .concat(factChecker)
+  .concat(questionsRX)
   .concat(APAtitle)
   .concat(APAjournal)
 
@@ -99,10 +98,12 @@ let mistakes = phrasalVerbs
   .concat(weasel)
   .concat(weakWords)
   .concat(shortForms)
+  .concat(overgeneralization)
 
 
 let repetitions = [];
 let concludingSentences = []
+let topicSentences = []
 let thesisStatement = ''
 let facts = []
 let titles = []
@@ -110,7 +111,7 @@ let journals = []
 let quotations = []
 let citationStyle = 'APA'
 let words = mistakes
-
+let replaceFormat = [].concat(/<i>[^<]+<\/i>/g)
 
 
 // eslint-disable-next-line no-extend-native
@@ -134,117 +135,164 @@ const dragComment = (key, { clientY }) => {
 
       }
     }
-
   }
 }
-function findAndReplace(mistake,repl,regex, contentBlock,callback) {
-  let text = contentBlock.getText();
-  let matchArr, start, end;
-  while ((matchArr = regex.exec(text)) !== null) {
-    start = matchArr.index;
-    end = start + matchArr[0].length;
-    callback(start, end);
-    text = text.replace(new RegExp(`\\b${mistake}\\b`,'i'),repl)
-  }
-   // Prevent text selection
-   if(document.selection && document.selection.empty) {
-    document.selection.empty();
-  } else if(window.getSelection) {
-    var sel = window.getSelection();
-    sel.removeAllRanges();
-  }
-}
-
-function findWithRegex(words, contentBlock, callback) {
-  const text = contentBlock.getText();
-
-  sentenceRX.forEach(sentenceRX => {
-    const matches = [...text.matchAll(sentenceRX)];
-    if (sentenceRX === thesisRX && text.includes('. ') && !thesisStatement) {
-      if (matches.length) {
-        thesisStatement = matches[0][0]
-      }
-      else {
-        thesisStatement = '~!!!' 
-        return
-      }
-    } else if (sentenceRX === thesisRX && text.includes('. ') && thesisStatement) {
-      if (matches.length) {
-        return
-      }
+function findAndReplace(
+  mistake,
+  repl,
+  regex,
+  replKey,
+  contentBlock,
+  callback) 
+  {
+  if (replKey === contentBlock.key) {
+    let text = contentBlock.getText();
+    let matchArr, start, end;
+    while ((matchArr = regex.exec(text)) !== null) {
+      start = matchArr.index;
+      end = start + matchArr[0].length;
+      callback(start, end);
+      text = text.replace(new RegExp(`\\b${mistake}\\b`,'i'),repl)
     }
-    
+     // Prevent text selection
+     if(document.selection && document.selection.empty) {
+      document.selection.empty();
+    } else if(window.getSelection) {
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+    }
+  } else {
+    console.log("does not")
+  }
+}
+function replaceWithFormat(replaceArr, contentBlock, callback) {
+  const text = contentBlock.getText();
+  replaceArr.forEach(replaceItem => {
+    const matches = [...text.matchAll(replaceItem)];
     matches.forEach(match => {
-      switch (sentenceRX) {
-        case concludingSentencesRX:
-          concludingSentences.push(match[0])
-        case factChecker:
-          facts.push(match[0])
-        case APAtitle:
-          titles.push(match[0])
-        case APAjournal:
-          journals.push(match[0])
+      if (match) {
+        callback(match.index, match.index + match[0].length);
       }
+    })
+  })
+}
+function findWithRegex(mistakes, contentBlock, callback) {
+  const text = contentBlock.getText();
+  if (text) {
+    let sentences = sentencesRX,
+        issues = mistakes,
+        RX = regexes;
+    if (isReference.test(text)) {
+      // when checking a reference, disable all RegExp not relating to references
+      issues = []
+      sentences = []
+        .concat(APAtitle)
+        .concat(APAjournal)
+      RX = []
+        .concat(uppercaseRX)
+        .concat(outdated)
+    }
+    sentences.forEach(sentenceRX => {
+      const matches = [...text.matchAll(sentenceRX)];
+      if (sentenceRX === thesisRX && text.includes('. ') && !thesisStatement) {
+        if (matches.length) {
+          thesisStatement = matches[0][0]
+        }
+        else {
+          thesisStatement = '~!!!' 
+          return
+        }
+      } else if (sentenceRX === thesisRX && thesisStatement && !text.includes(thesisStatement)) {
+        return
+      }
+
+      matches.forEach(match => {
+        switch (sentenceRX) {
+          case concludingSentencesRX:
+            concludingSentences.push(match[0]) 
+            break
+          case topicSentencesRX:
+            topicSentences.push(match[0]) 
+            break
+          case factChecker:
+            facts.push(match[0]) 
+            break
+          case APAtitle:
+            titles.push(match[0]) 
+            break
+          case APAjournal:
+            journals.push(match[0]) 
+            break
+          default:
+            {}
+          }
+          
+  
+        if (match) {
+          callback(match.index, match.index + match[0].length);
+  
+        }
+      })
+    })
+    issues.forEach(word => {
+      
+      // eslint-disable-next-line
+      let regexp = new RegExp(`(?<!-|\/)\\b${word}\\b(?!-|\/)`, `gi`)
+      if (word === 'us') {
+        // eslint-disable-next-line
+        regexp = new RegExp(`(?<!-|\/)\\b${word}\\b(?!-|\/)`, `g`)
+      }
+      const matches = [...text.matchAll(regexp)];
+  
+      matches.forEach(match => {
+        if (match) {
+          callback(match.index, match.index + match[0].length);
+        }
+      })
+    });
+    RX.forEach(regexp => {
+      if (citationStyle === 'MLA' && regexp === APAcitationGlobal) return
+      if (citationStyle === 'APA' && regexp === MLAcitationGlobal) return
+      
+      const matches = [...text.matchAll(regexp)];
         
 
-      if (match) {
-        callback(match.index, match.index + match[0].length);
-
+      if (regexp === repetitionsRX) {
+        if (/^(?:Works? Cited|References?)$/i.test(text)) {
+          return
+        }
+        matches.forEach(m => repetitions.push(m[0]))
       }
-    })
-  })
-  words.forEach(word => {
-
-    let regexp = new RegExp(`(?<!-|\/)\\b${word}\\b(?!-|\/)`, `gi`)
-    if (word === 'us') {
-      regexp = new RegExp(`(?<!-|\/)\\b${word}\\b(?!-|\/)`, `g`)
-    }
-    const matches = [...text.matchAll(regexp)];
-
-    matches.forEach(match => {
-      if (match) {
-        callback(match.index, match.index + match[0].length);
+      if (regexp === APAtitle) {
+        matches.forEach(m => titles.push(m[0]))
       }
-    })
-
-  });
-  regexes.forEach(regexp => {
-    if (citationStyle === 'MLA' && regexp === APAcitationGlobal) return
-    if (citationStyle === 'APA' && regexp === MLAcitationGlobal) return
-
-    const matches = [...text.matchAll(regexp)];
-
-    if (regexp === repetitionsRX) {
-      matches.forEach(m => repetitions.push(m[0]))
-    }
-    if (regexp === APAtitle) {
-      matches.forEach(m => titles.push(m[0]))
-    }
-    if (regexp === APAjournal) {
-      matches.forEach(m => journals.push(m[0]))
-    }
-
-    matches.forEach(match => {
-      if (match) {
-        callback(match.index, match.index + match[0].length);
+      if (regexp === APAjournal) {
+        matches.forEach(m => journals.push(m[0]))
       }
+      if (regexp === pageForQuote) {
+        matches.forEach(m => quotations.push(m[0]))
+      }
+  
+      matches.forEach(match => {
+        if (match) {
+          callback(match.index, match.index + match[0].length);
+        }
+      })
+  
+  
+  
     })
+  }
 
-
-
-  })
 
 }
 
-const styles = {
-  editor: {
-    border: "1px solid gray",
-    minHeight: "6em"
-  }
-};
 
 function handleStrategy(contentBlock, callback) {
   findWithRegex(words, contentBlock, callback);
+}
+function replaceStrategy(contentBlock, callback) {
+  replaceWithFormat(replaceFormat, contentBlock, callback);
 }
 function getBlockStyle(block) {
   switch (block.getType()) {
@@ -263,9 +311,9 @@ function getBlockStyle(block) {
 function findReplaceOptions(mistake,replace,replaceOptions) {
   try {
     if (mistake.charAt(0) ===  mistake.charAt(0).toLowerCase() || mistake === 'America') {
-      replaceOptions = Object.values(replace.find(i => new RegExp(`^\\b${Object.keys(i)[0]}\\b$`, 'gi').test(mistake)))[0]
+      replaceOptions = Object.values(replace.find(i => new RegExp(`^${Object.keys(i)[0]}$`, 'gi').test(mistake)))[0]
     } else if (mistake.charAt(0) ===  mistake.charAt(0).toUpperCase()) {
-      replaceOptions = Object.values(replace.find(i => new RegExp(`^\\b${Object.keys(i)[0]}\\b$`, 'gi').test(mistake)))[0].split(',').map(w => w.trim().capitalize()).join(',')
+      replaceOptions = Object.values(replace.find(i => new RegExp(`^${Object.keys(i)[0]}$`, 'gi').test(mistake)))[0].split(',').map(w => w.trim().capitalize()).join(',')
     }
   } catch {
 
@@ -276,8 +324,11 @@ function findReplaceOptions(mistake,replace,replaceOptions) {
 export default class RichEditorExample extends React.Component {
   constructor(props) {
     super(props);
+    const Replaced = ({ decoratedText }) => {
+      return <span dangerouslySetInnerHTML={{ __html: decoratedText }}></span>;
+    }
     const Decorated = (props) => {
-      let { children, decoratedText, offsetKey } = props,
+      let { children, decoratedText, offsetKey, blockKey } = props,
         name = '*',
         comment = 'Mistake',
         color = 'yellow',
@@ -286,7 +337,6 @@ export default class RichEditorExample extends React.Component {
         mistake = decoratedText
       
      
-      
       // Punctuation
 
       if (punctuationRXinline.test(mistake)) {
@@ -305,14 +355,14 @@ export default class RichEditorExample extends React.Component {
 
       else if (weakWords.find(v => new RegExp(`^\\b${v}\\b$`,'i').test(mistake))) {
         name = 'Weak Word'
-        comment = `Avoid using weak words in academic writing: since they have numerous meanings, they might be ambiguous and unclear in your context. Moreover, poor vocabulary has always been one the most unpleasant writers' disadvantages. <div>Click to see synonyms for "<a class='comment__thesaurus-link' target='_blank' href=https://www.thesaurus.com/browse/${mistake.replace(/\s/g,'%20')}?s=t>${mistake}</a>" at thesaurus.</div>`
+        comment = `Avoid using weak words in academic writing: since they have numerous meanings, they might be ambiguous and unclear in your context. Moreover, poor vocabulary has always been one the most unpleasant writers' disadvantages. <div>Click to see synonyms for "<a class='comment__thesaurus-link' rel="noopener noreferrer" target='_blank' href=https://www.thesaurus.com/browse/${mistake.replace(/\s/g,'%20')}?s=t>${mistake}</a>" at thesaurus.</div>`
         replaceOptions = findReplaceOptions(mistake,replace,replaceOptions)
 
       }
       // Phrasal Verbs
       else if (phrasalVerbs.find(pv => new RegExp(`^\\b${pv}\\b$`,'i').test(mistake))) {
         name = 'Phrasal Verb'
-        comment = `Do not use phrasal verbs as they are considered informal. Click to see synonyms for "<a class='comment__thesaurus-link' target='_blank' href=https://www.thesaurus.com/browse/${mistake.replace(/\s/g,'%20')}?s=t>${mistake}</a>" at thesaurus.`
+        comment = `Do not use phrasal verbs as they are considered informal. Click to see synonyms for "<a class='comment__thesaurus-link' rel="noopener noreferrer" target='_blank' href=https://www.thesaurus.com/browse/${mistake.replace(/\s/g,'%20')}?s=t>${mistake}</a>" at thesaurus.`
         replaceOptions = findReplaceOptions(mistake,replace,replaceOptions)
 
       }
@@ -329,6 +379,14 @@ export default class RichEditorExample extends React.Component {
         comment = "Academic writing requires objectivity. In terms of pronouns use, it means that you have to use preferably the third person perspective <div class='example'><span class='example__correct'>he, she, it, they</span></div> rather than first or second <div class='example'><span class='example__wrong'>we, us, our, you, your</span></div>"
         readMore = 'https://www.scribbr.com/academic-writing/pronouns/'
       }
+      // Conjunction Start
+      else if (/^(?:And|But|Or)$/.test(mistake)) {
+        name = 'Sentence Structure'
+        comment = 'Do not begin sentences with <b>And</b>, <b>But</b>, and <b>Or</b>'
+        readMore = "https://www.merriam-webster.com/words-at-play/words-to-not-begin-sentences-with"
+        replaceOptions = mistake === "And" ? "Furthermore,Moreover" : mistake === "But" ? "However,Nevertheless" : "Conversely,On the other hand"
+       
+      }
       // Short Forms
       else if (shortForms.split('|').find(s => s === mistake.toLowerCase())) {
         name = 'Contraction'
@@ -336,22 +394,31 @@ export default class RichEditorExample extends React.Component {
         replaceOptions = findReplaceOptions(mistake,replace,replaceOptions)
        
       }
+      // Overgeneralization
+      else if (overgeneralization.find(i => new RegExp(`^\\b${i}\\b$`,'i').test(mistake))) {
+        name = 'Overgeneralization'
+        comment = 'It might be tempting to state "All apples are red." It would deprive you of the need to examine all possible kinds, colors, and shades of apples. However, writing an academic paper is just about that. In academic writing, you can provide generalizations, but they would require solid evidence. If there is no evidence, do not make such a claim.'
+        readMore = 'http://blog.myieltsclassroom.com/how-to-avoid-over-generalising/'
+       
+      }
       // Informal
       else if (informal.find(i => new RegExp(`^\\b${i}\\b$`,'i').test(mistake))) {
         name = "Informal"
         comment = "Such writing might be considered inappropriate in terms of academic writing. Please, consider finding a formal equivalent or rephrasing the sentence."
         readMore = 'https://www.uts.edu.au/current-students/support/helps/self-help-resources/grammar/formal-and-informal-language'
+        replaceOptions = findReplaceOptions(mistake,replace,replaceOptions)
       }
       // Wordiness 
-      else if (wordiness.includes(mistake.toLowerCase())) {
+      else if (wordiness.find(i => new RegExp(`^${i}$`,'i').test(mistake))) {
         name = "Wordiness"
         comment = "This phrase might be unnecessarily wordy. Academic writing requires concise word choice meaning that you should not use exceedingly wordy phrases that are, in fact, not necessary for the developing of your thought."
         readMore = 'https://proofreadingpal.com/proofreading-pulse/essays/how-to-avoid-wordiness/'
+        replaceOptions = findReplaceOptions(mistake,replace,replaceOptions)
       }
       // Vague 
       else if (vague.find(v => new RegExp(`^\\b${v}\\b$`,'i').test(mistake))) {
         name = "Vague"
-        comment = `It might be unclear what exactly you intend to express. Such wording might be interpreted in a variety of ways depriving your argument of much needed details. <div>Click to find synonyms for "<a class='comment__thesaurus-link' target='_blank' href=https://www.thesaurus.com/browse/${mistake.replace(/\s/g,'%20')}?s=t>${mistake}</a>" at Thesaurus.</div>`
+        comment = `It might be unclear what exactly you intend to express. Such wording might be interpreted in a variety of ways depriving your argument of much needed details.`
         readMore = 'https://writingcommons.org/article/vague-language/'
         replaceOptions = findReplaceOptions(mistake,replace,replaceOptions)
 
@@ -389,9 +456,7 @@ export default class RichEditorExample extends React.Component {
       else if (uppercaseRX.test(mistake)) {
         name = "Uppercase"
         comment = "Do not use uppercase in academic writing."
-        try {
-          replaceOptions = toTitleCase(mistake.toLowerCase())
-        } catch {}
+          replaceOptions = /\s/.test(mistake) ? `${mistake.toLowerCase().capitalize()},${toTitleCase(mistake.toLowerCase())}` : `${mistake.toLowerCase().capitalize()}`
 
       }
       else if (mistake === 'Introduction') {
@@ -399,21 +464,38 @@ export default class RichEditorExample extends React.Component {
         comment = `According to the latest APA formatting standards, you must not include the "Introduction" heading`
         readMore = 'https://owl.purdue.edu/owl/research_and_citation/apa_style/apa_formatting_and_style_guide/apa_headings_and_seriation.html'
       }
+      else if (mistake === 'internet') {
+        name = "Capitalization"
+        comment = `<b>Internet</b> is a proper noun (it is a name that identifies a particular thing). All proper nouns must be capitalized.`
+        replaceOptions = 'Internet'
+      }
+      // Apostrophes
+      else if (apostrophes.test(mistake)) {
+        name = "Apostrophes"
+        comment = "For terms, titles, and quotations, use quotation marks or italics. Apostrophes should be used only in possessive cases or inside quotation marks (quote within a quote)."
+        replaceOptions = `“${mistake.replace(/(?:'|‘|’)/g,"")}”,<i>${mistake.replace(/(?:'|‘|’)/g,"")}</i>`
+      }
       // Outdated
       else if (/^\d{4}$/.test(mistake)) {
         name = "Outdated Source"
-        comment = "In most cases, you have to use the most relevant sources available on the topic. If the customer do not require specific sources, use those published within the last 10 years."
+        comment = "In most cases, you have to use the most relevant sources available on the topic. If the customer does not require specific sources, use those published within the last 10 years."
       }
       // Word Order
       else if (prepositionalRX.test(mistake)) {
-        name = "Prepositions"
+        name = "Prepositions Overuse"
         comment = `Overusing prepositions might negatively affect text readability. I recommend you to rephrase it using fewer prepositions.`
         readMore='https://www.dailywritingtips.com/5-ways-to-reduce-use-of-prepositions/'
       }
       else if (wordOrderRX.test(mistake)) {
         name = "Word Order"
         comment = `Do not put adverbs between the "to" and the infinitive verb.`
-        replaceOptions = mistake.split(' ')[0] + ' ' + mistake.split(' ')[2] + ' ' + mistake.split(' ')[1] + ',' + mistake.split(' ')[1] + ' ' + mistake.split(' ')[0] + ' ' + mistake.split(' ')[2]
+        let repl1 = mistake.split(' ')[0] + ' ' + mistake.split(' ')[2] + ' ' + mistake.split(' ')[1];
+        if (/[A-Z][a-z]+/.test(repl1)) repl1 = repl1.toLowerCase().capitalize()
+        let repl2 = mistake.split(' ')[1] + ' ' + mistake.split(' ')[0] + ' ' + mistake.split(' ')[2];
+        if (/[A-Z][a-z]+/.test(repl2)) repl2 = repl2.toLowerCase().capitalize()
+
+        replaceOptions = `${repl1},${repl2}`
+        
       }
       // Determiner
       else if (/^(?:This|These|Those)$/.test(mistake)) {
@@ -423,8 +505,14 @@ export default class RichEditorExample extends React.Component {
       // Thesis Statement 
       else if (thesisStatement === mistake) {
         name = "Thesis Statement"
-        comment = "Thesis statement has to present the central argument of the paper or an expected result of research depending on the assignment type. Do not just provide what you are going to discuss: explain the issue and and how its solution."
+        comment = "Thesis statement has to present the central argument of the paper or an expected result of research depending on the assignment type. Do not state what you are going to discuss: explain the issue and its solution."
         readMore = 'https://writingcenter.unc.edu/tips-and-tools/thesis-statements/'
+      }
+      // Topic Sentences
+      else if (topicSentences.includes(mistake)) {
+        name = "Topic Sentence"
+        comment = "A topic sentence must reflect the main argument you will be supporting in this paragraph. It must not be a fact or evidence. Provide an argument first; evidence must follow. Not vice versa."
+        readMore = 'https://owl.purdue.edu/engagement/ged_preparation/part_1_lessons_1_4/index.html'
       }
       // Concluding Sentences
       else if (concludingSentences.includes(mistake) && mistake !== thesisStatement) {
@@ -485,12 +573,17 @@ export default class RichEditorExample extends React.Component {
         name = "APA Journal Formatting"
         comment = "Consider that in APA, journal title must have title-case formatting. It means that you should capitalize each major word of the title (except for prepositions, articles, and conjunctions)."
         try {
-          replaceOptions = toTitleCase(mistake) !== mistake ? toTitleCase(mistake) : ''
+          replaceOptions = toTitleCase(mistake) !== mistake ? `<i>${toTitleCase(mistake)}</i>` : ''
         } catch { }
 
         readMore = 'https://owl.purdue.edu/owl/research_and_citation/apa_style/apa_formatting_and_style_guide/reference_list_articles_in_periodicals.html'
       }
-
+      // Rhetoric Questions
+      else if (mistake.charAt(mistake.length-1) === "?") {
+        name = "Rhetoric Question"
+        comment = "Do not use rhetoric questions as they are not appropriate in academic writing. Might be used in creative writing only."
+        readMore = 'https://helpfulprofessor.com/rhetorical-questions/'
+      }
       // Quote 
       else if (citationStyle === 'APA' && quotations.includes(mistake)) {
         name = "APA Formatting"
@@ -503,22 +596,32 @@ export default class RichEditorExample extends React.Component {
       }
       // Replace
 
-      else if (replaceArray.find(i => new RegExp(`^\\b${i}\\b$`, 'gi').test(mistake))) {
+      else if (replaceArray.find(i => new RegExp(`^${i}$`, 'gi').test(mistake))) {
         name = "Replace"
         comment = "I would recommend you replace this with one of the following options since the word does not fit the norms or academic writing"
-        replaceOptions = Object.values(replace.find(i => new RegExp(`^\\b${Object.keys(i)[0]}\\b$`, 'gi').test(mistake)))[0]
-        
+
         replaceOptions = findReplaceOptions(mistake,replace,replaceOptions)
+
+        if (/^take( \w+) into consideration$/.test(mistake)) {
+          replaceOptions = 'consider '+mistake.split(' ')[1]
+        }
+        if (new RegExp(`^(?:${british})$`).test(mistake)) {
+          name = "British English"
+          comment = "Unless there were specific instructions requiring British English, you are recommended to use American English spelling"
+        }
+        
       }
           // Repetitions
       else if (repetitions.includes(mistake) && mistake !== 'which') {
-        color = '#c9daf8'
-        comment = `Avoid repeating the same words. Click to find synonyms for "<a class='comment__thesaurus-link' target='_blank' href=https://www.thesaurus.com/browse/${mistake}?s=t>${mistake}</a>" at Thesaurus.`
         name = 'Repetition'
+        let isDuplicated = mistake.includes(' ') && mistake.split(' ')[0] === mistake.split(' ')[1]
+        let duplicateComment = isDuplicated ? `It seems that you duplicated "${mistake.split(' ')[0]}". Click to fix.` : ''
+        color = '#c9daf8'
+        comment = !isDuplicated ? `Avoid repeating the same words. Click to find synonyms for "<a class='comment__thesaurus-link' rel="noopener noreferrer" target='_blank' href=https://www.thesaurus.com/browse/${mistake}?s=t>${mistake}</a>" at Thesaurus.` : duplicateComment
+        replaceOptions = isDuplicated ? mistake.split(' ')[0] : ''
+       
+        
     }
-     
-
-
       let spanAnimation = useSpring({
         to: {paddingLeft: 0,backgroundColor: color},
         from: {paddingLeft: '-45px',backgroundColor: 'rgba(0,0,0,0)'},
@@ -527,8 +630,9 @@ export default class RichEditorExample extends React.Component {
 
       return <animated.span className='highlight'
         style={spanAnimation}
+        block={blockKey}
         onMouseOver={(e) => dragComment(offsetKey, e)}
-        onDoubleClick={(e) => this.replaceOnDoubleClick(offsetKey, e)}
+        onDoubleClick={(e) => this.replaceOnDoubleClick(blockKey, e)}
         comment={comment}
         name={name}
         commentkey={offsetKey}
@@ -542,6 +646,10 @@ export default class RichEditorExample extends React.Component {
         {
           strategy: handleStrategy,
           component: Decorated
+        },
+        {
+          strategy: replaceStrategy,
+          component: Replaced
         }
       ]);
     this.state = { editorState: EditorState.createEmpty(createDecorator()),comments:[] };
@@ -598,65 +706,12 @@ export default class RichEditorExample extends React.Component {
       }
     }
   }
-  findWithRegex = (words, contentBlock, callback) => {
-    const text = contentBlock.getText();
-    sentenceRX.forEach(sentence => {
-
-      const matches = [...text.matchAll(sentence)];
-
-      matches.forEach(match => {
-        if (match) {
-          callback(match.index, match.index + match[0].length);
-
-        }
-      })
-    })
-    words.forEach(word => {
-      let regexp = word === 'us' ? new RegExp(`\\b${word}\\b`, 'g') : new RegExp(`\\b${word}\\b`, 'gi')
-
-      const matches = [...text.matchAll(regexp)];
-
-      matches.forEach(match => {
-        if (match) {
-          callback(match.index, match.index + match[0].length);
-        }
-      })
-
-    });
-    regexes.forEach(regexp => {
-
-      const matches = [...text.matchAll(regexp)];
-      
-      if (regexp === repetitionsRX) {
-        matches.forEach(match => {
-          if (!repetitions.includes(match[0]))
-            repetitions.push(match[0])
-        })
-      }
-      if (regexp === pageForQuote) {
-        matches.forEach(match => {
-          if (!quotations.includes(match[0]))
-            quotations.push(match[0])
-        })
-      }
-
-      matches.forEach(match => {
-        if (match) {
-          callback(match.index, match.index + match[0].length);
-        }
-      })
-
-
-
-    })
-  }
+ 
   showHighlight = (id) => {
 
     if (id !== 'off') {
       let highlight = document.querySelector(`span[commentKey="${id}"]`)
       let otherHighlights = document.querySelectorAll(`span[commentKey]:not([commentKey="${id}"])`)
-
-      let comment = document.querySelector(`.comment[id="${id}"]`)
 
 
       if (highlight) highlight.style.backgroundColor = 'rgb(255,117,107)'
@@ -688,20 +743,24 @@ export default class RichEditorExample extends React.Component {
     }
 
   }
-  replaceById = ({ text, repl }) => {
-   
+  replaceById = ({ text, repl, block }) => { 
     let regex = new RegExp(`\\b${text}\\b`, 'g');
     if (text.charAt(0) === '(') {
       regex = new RegExp(`${text.replace(/\(/,'\\(').replace(/\)/,'\\)')}`, 'g');
-      
       repl = `(${repl.replace(/(?:\(|\))/g,'')})`
-      
+    }
+    if (/(?:'|‘)/.test(text.charAt(0))) {
+      regex = new RegExp(`${text}`, 'g');      
+    }
+    if (/\?$/.test(text)){
+      regex = new RegExp(`${text}`, 'g');   
+      repl = repl.substring(0,repl.length-1)   
     }
     const { editorState } = this.state;
     const selectionsToReplace = [];
     const blockMap = editorState.getCurrentContent().getBlockMap();
     blockMap.forEach((contentBlock) => (
-      findAndReplace(text,repl,regex, contentBlock, (start, end) => {
+      findAndReplace(text,repl,regex, block, contentBlock, (start, end) => {
         const blockKey = contentBlock.getKey();
         const blockSelection = SelectionState
           .createEmpty(blockKey)
@@ -733,10 +792,9 @@ export default class RichEditorExample extends React.Component {
 
     this.props.killReplaceTarget()
   }
-  replaceOnDoubleClick = (key, { clientY, clientX, target }) => {
+  replaceOnDoubleClick = (blockKey, { clientY, clientX, target }) => {
    
     
-    let comment = document.getElementById(key)
     let span = target.parentNode.parentNode
     let value = span.attributes.replaceoptions.value
     let text = target.innerText
@@ -755,7 +813,7 @@ export default class RichEditorExample extends React.Component {
         }
       }
      
-      this.replaceById({ text: text, repl: value })
+      this.replaceById({ text: text, repl: value, block: blockKey })
     }
     else {
       // No replace buttons
@@ -805,7 +863,7 @@ export default class RichEditorExample extends React.Component {
       
       let stateComments = this.props.stateComments.comments
       if (this.props.replaceTarget) {
-      
+        console.log(this.props.replaceTarget)
         this.replaceById(this.props.replaceTarget)
   
       }
@@ -815,7 +873,7 @@ export default class RichEditorExample extends React.Component {
       }
       for (let highlight of highlights) {
         let c = highlight.attributes
-        let commentObject = { id: c.commentkey.value, name: c.name.value, text: c.comment.value, replaceOptions: c.replaceoptions.value, readMore: c.readmore.value, mistake: highlight.innerText }
+        let commentObject = { id: c.commentkey.value, block: c.block.value, name: c.name.value, text: c.comment.value, replaceOptions: c.replaceoptions.value, readMore: c.readmore.value, mistake: highlight.innerText }
         comments.push(commentObject)
       }
       if (comments.length && stateComments.length !== comments.length) {

@@ -1,3 +1,4 @@
+let remove = "[I recommend to remove this as it might appear not academic or simply useless in your paper]"
 let replace = [
     { '(?<!the United States of |North |South |Latin )America\\b': 'the US["America" might be vague. If you mean the country, please replace.]' },
     
@@ -13,6 +14,8 @@ let replace = [
     { 'aforesaid': 'earlier in this document' },
     { 'aggregate': 'total' },
     { 'amalgamation': 'integration' },
+    { ', among others?': remove },
+    { ', and so on( and so forth)?': remove },
     { 'alleviate': 'ease, reduce' },
     { 'anticipates': 'expects' }, 
     { 'anticipated': 'expected' }, 
@@ -25,8 +28,6 @@ let replace = [
     { 'as of the date of': 'from' },
     { 'as regards': 'on the subject of' },
     { 'ascertain': 'establish' },
-    { 'assemble': 'build, gather' },
-    { 'attributable to': 'because of' },
     { 'axiomatic': 'obvious' },
     { 'and also': 'and' },
     { 'appear to be': 'are' },
@@ -47,11 +48,6 @@ let replace = [
     { 'becomes a witness of': 'witnesses' },
     { 'becoming a witness of': 'witnessing' },
     { 'became a witness of': 'witnessed' },
-    { 'belated': 'late' },
-    { 'bestow': 'give, award' },
-    { 'breach': 'break' },
-    { 'breaches': 'breaks' },
-    { 'breached': 'broke' },
     { 'by means of': 'by' },
     { 'bring about': 'cause' }, 
     { 'brings about': 'causes' }, 
@@ -70,12 +66,11 @@ let replace = [
    
     // C
     { 'could be able to': 'could' },
-    { 'ceases': 'finishes, stops, ends' }, 
-    { 'ceased': 'finished, stopped, ended' },
-    { 'ceasing': 'finishing, stopping, ending' }, 
-    { 'cease': 'finish, stop, end' },
-    { 'circumvent': 'avoid, skirt, circle' },
-    { 'chance':'opportunity, opportunity,possibility'},
+    { 'chance':'opportunity,possibility'},
+    { 'creates':'establishes,conceives,constitutes'},
+    { 'created':'established,conceived,constituted'},
+    { 'creating':'establishing,conceiving,constituting'},
+    { 'create':'establish,conceive,constitute'},
     { 'cognizant': 'aware' },
     { 'commensurate': 'equal' },
     { 'consolidates': 'combines' },
@@ -88,13 +83,8 @@ let replace = [
     { 'compiling': 'collecting' },
     { 'component': 'element' },
     { 'comprises': 'includes' },
-    { 'concur': 'agree' },
-    { 'constitutes': 'forms' },
     { 'construe': 'interpret' },
     { 'costs the sum of': 'costs' },
-    { 'courteous': 'polite' },
-    { 'cumulative': 'added together' },
-    { 'customary': 'usual, normal' },
 
     // D
     { 'deem to be': 'treat as' },
@@ -102,17 +92,9 @@ let replace = [
     { 'deals with': 'handles, manages' },
     { 'dealt with': 'handled, managed' },
     { 'dealing with': 'handling, managing'},
-    { 'deleterious': 'harmful' },
-    { 'disseminates': 'issue or send' }, 
-    { 'disseminated': 'issue or send' }, 
-    { 'disseminating': 'issue or send' }, 
-    { 'disseminate': 'issue or send' },
     { 'despite the fact that': 'though, although' },
     { 'detrimental': 'harmful, damaging' },
-    { 'discontinue': 'stop, end' },
-    { 'discrete': 'separate' },
     { 'disseminate': 'spread' },
-    { 'documentation': 'papers, documents' },
     { 'domiciled in': 'living in' },
     { 'drawbacks': 'disadvantages,weaknesses,vulnerabilities' }, 
     { 'drawback': 'disadvantage,weakness,vulnerability' },
@@ -121,16 +103,8 @@ let replace = [
 
     // E
     { 'eligible': 'allowed, qualified' },
-    { 'elucidate': 'clarify' },
-    { 'enclosed': 'inside, with' },
-    { 'encounter': 'meet' },
-    { 'enquiry': 'question' },
     { 'envisage': 'expect, imagine' },
-    { 'evince': 'prove' },
     { 'expedite': 'accelerate' },
-    { 'expeditiously': 'as soon as possible, quickly' },
-    { 'expenditure': 'spending' },
-    { 'extremity': 'limit' },
 
     // F
     { 'fights': 'combats,withstands'},
@@ -145,23 +119,25 @@ let replace = [
     { 'for the duration of': 'during, while' },
     { 'for the purpose of': 'to, for' },
     { 'for the sake of': 'for' },
-    { 'formulate': 'plan, devise' },
-    { 'forthwith': 'now, at once' },
-    { 'further to': 'after, following' },
 
     // G
-    { 'generate': 'produce' },
     { 'gives':'provides,supplies,presents'},
     { 'gave':'provided,supplied,presented'},
     { 'giving':'providing,supplying,presenting'},
     { 'give':'provide,supply,present'},
     { 'give consideration to': 'consider' },
 
+    {'get well':'recover'},
+    {'gets well':'recovers'},
+    {'getting well':'recovering'},
+    {'got well':'recovered'},
+
     // H
     { 'happens':'occurs'},
     { 'happened':'occurred'},
     { 'happening':'occurring'},
     { 'happen':'occur'},
+    { 'have been able to':'could'},
     { 'henceforth': 'from now on, from today' },
     { 'he/she': 'he or she' },
     { 'his/her': 'his or her' },
@@ -215,16 +191,10 @@ let replace = [
     { 'lets': 'permits' },
     { 'letting': 'permitting' },
     { 'let': 'permit' },
-    { 'leverages': 'uses' }, 
-    { 'leveraged': 'used' }, 
-    { 'leveraging': 'using' }, 
-    { 'leverage': 'use' },
     { 'look at': 'consider' },
     { 'looks at': 'considers' },
     { 'looked at': 'considered' },
     { 'looking at': 'considering' },
-    { 'locality': 'place, area' },
-    { 'locate': 'find, put' },
     
 
     // M
@@ -266,54 +236,39 @@ let replace = [
     { 'made sure': 'ensured' },
     { 'magnitude': 'size' },
     { 'making sure': 'ensuring' }, { 'makes sure': 'ensures' }, { 'made sure': 'ensured' }, { 'making sure': 'ensuring' },
-    { 'marginal': 'small, slight' },
-    { 'materialize': 'occur' },
     { 'may in the future': 'may, might, could' },
+    { 'mess':'disorder,chaos,clutter'},
     { 'might be able to': 'might' }, 
+    { 'more so': 'moreover' }, 
 
 
     // N
-    { 'notwithstanding': 'even if, despite, still, yet' },
     
     // O
     { 'occasioned by': 'caused by, because of' },
     { 'on a regular basis': 'regularly' },
-    { 'on behalf of': 'for' },
-    { 'on numerous occasions': 'often' },
     { 'on the grounds that': 'because' },
     { 'on the occasion that': 'when, if' },
     { '(?<!(?:years? |-))\\bold\\b(?!-)':'elderly,ancient,aged'},
-    { 'ordinarily': 'normally, usually' },
-    { 'owing to': 'because of' },
     
     // P
     { 'partially': 'partly' },
     { 'particulars': 'details, facts' },
     { 'per annum': 'a year' },
-    { 'permissible': 'allowed' },
-    { 'persons': 'people' },
+    { 'per cent': 'percent' },
+    { 'persons': 'individuals,people' },
     { 'person being interviewed': 'interviewee' },
     { 'prior to': 'before' },
-    { 'problem': 'issue' },
     { 'problems': 'issues' },
+    { 'problem': 'issue' },
     { 'procure': 'obtain, arrange' },
     { 'profusion of': 'plenty, too many' },
     { 'projected': 'estimated' },
     { 'prolonged': 'long' },
     { 'promptly': 'quickly, at once' },
     { 'promulgate': 'advertise, announce' },
-    { 'proportion': 'part' },
-    { 'provided that': 'if, as long as' },
-    { 'provisions': 'rules, terms' },
-    { 'proximity': 'closeness, nearness' },
-    { 'proficiency': 'skill' }, 
-    { 'proficiencies': 'skills' },
-    { 'promulgates': 'issues or publishes' }, 
-    { 'promulgated': 'issued or published' }, 
-    { 'promulgating': 'issuing or publishing' }, 
-    { 'promulgate': 'issue or publish' },
     { 'proximity': 'near' },
-    { 'pursuant to': 'under, because of, in line with' },
+
 
     // R
     { 'reiterate': 'repeat, restate' },
@@ -336,9 +291,7 @@ let replace = [
     { 'seeming': 'appearing' },
     { 'seem': 'appear' },
     { 'smart': 'intelligent' },
-    { 'small': 'diminutive'},
-    { 'subject to': 'depending on, under, keeping to' },
-    { 'submit': 'send, give' },
+    { 'small': 'insignificant,slight,limited'},
     { 'staff': 'personnel,employees' },
 
     // T
@@ -353,14 +306,8 @@ let replace = [
     { 'talk about': 'discuss' },
     { 'talks about': 'discusses' },
     { 'talking about': 'discussing' },
-    { 'terminate': 'stop, end' },
-    { 'that being the case': 'if so' },
     { 'the question as to whether': 'whether' },
     { 'thereafter': 'then, afterwards' },
-    { 'thereby': 'by that, because of that' },
-    { 'therein': 'in that, there' },
-    { 'thereof': 'of that' },
-    { 'thereto': 'to that' },
     { 'tertiary institutions': 'higher education institutions' },
     { 'tertiary institution': 'higher education institution' },
     { 'told (<span>)?about(</span>)?': 'narrated,discussed,notified' },
@@ -373,8 +320,6 @@ let replace = [
     { 'to the extent that': 'if, when' },
 
     // U
-    { 'unilateral': 'one-sided, one-way' },
-    { 'unoccupied': 'empty' },
     { 'until such time': 'until' },
     { 'utilize': 'use' },
     { 'utilizes': 'uses' },
@@ -384,10 +329,12 @@ let replace = [
     // V
 
     // W
-    { 'ways and means': 'ways' },
-    { 'whatsoever': 'whatever, what, any' },
+    { 'wants':'prefers,requires,desires'},
+    { 'wanted':'preferred,required,desired'},
+    { 'wanting':'preferring,requiring,desiring'},
+    { 'want':'prefer,require,desire'},
+
     { 'whensoever': 'when' },
-    { 'whereas': 'but' },
     { 'will be able to': 'could' },
     { 'whether or not': 'whether' },
     { 'with a view to': 'to, so that' },
@@ -417,8 +364,8 @@ let replace = [
     { 'big' : 'considerable,large,extensive'},
     { 'happy': 'optimistic,satisfied,glad' },
     { 'unhappy': 'pessimistic,frustrated,disappointed' },
-    { 'great': 'considerable,prominent,excellent' },
-    { 'greatly': 'considerably,positively,excellently' },
+    { 'greatly': 'excellently,positively,considerably' },
+    { 'great': 'excellent,prominent,considerable' },
     { 'quite': 'fairly,rather,reasonably' },
     { 'very': 'noticeably,highly,profoundly' },
     { 'tries': 'attempts,struggles,endeavours' },
@@ -516,6 +463,7 @@ let replace = [
     { "i'd": "I would" },
 
     // British
+    { "acknowledgement" : "acknowledgment" },
     { 'aeroplane': 'airplane' },
     { 'aeroplanes': 'airplanes' },
     { 'aluminium': 'aluminum' },
@@ -527,6 +475,8 @@ let replace = [
     { 'behaviourist': 'behaviorist' },
     { 'behaviourists': 'behaviorists' },
     { 'behavioural': 'behavioral' },
+    { 'behaviours': 'behaviors' },
+    { 'behaviour': 'behavior' },
     { 'bin': 'trash can' },
     { 'bins': 'trash cans' },
     { 'car park': 'parking lot' },
@@ -536,6 +486,7 @@ let replace = [
     { 'colour': 'color' },
     { 'colours': 'colors' },
     { 'grey': 'gray' },
+    { 'favour': 'favor' },
     { 'favourite': 'favorite' },
     { 'high street': 'main street' },
     { 'harbour': 'harbor' },
@@ -553,6 +504,7 @@ let replace = [
     { 'moustache': 'mustache' },
     { 'queue': 'line' },
     { 'queues': 'lines' },
+    { 'labour': 'labor' },
     { 'learnt': 'learned' },
     { 'odour': 'odor' },
     { 'per cent': 'percent' },
@@ -740,7 +692,6 @@ let replace = [
     { 'turned down': 'refused' },
     { 'turning down': 'refusing' },
 
-
     { 'make up': 'invent' },
     { 'makes up': 'invents' },
     { 'made up': 'invented' },
@@ -750,13 +701,10 @@ let replace = [
     { 'puts up': 'raises, increases' },
     { 'putting up': 'raising, increasing' },
 
-    // Grammar 
-   
-
-
-    // Idioms 
-
-    { 'in line with': 'similar to,according to[Avoid idiomatic expressions]' },
+    // Wordiness
+    { 'In conclusion,\\s' : remove},
+    { 'it is \\w+ to (?:mention|say|note|argue|state|claim|discuss|remind|recall) that ' : remove},
+    { 'it is worth \\w+ing that ' : remove},
 
 ]
 

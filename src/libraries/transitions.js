@@ -26,7 +26,6 @@ let transitions = [
     "Thus",
     "Hence",
     "As a result",
-    "Often",
     "On the other hand",
     "For example",
     "For instance",
